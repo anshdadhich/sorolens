@@ -75,9 +75,8 @@ from .create_report_subscription_body_frequency import (
     CreateReportSubscriptionBodyFrequency,
 )
 from .error import Error
-from .error_error_type_0 import ErrorErrorType0
-from .error_error_type_0_code import ErrorErrorType0Code
-from .error_error_type_1 import ErrorErrorType1
+from .error_error import ErrorError
+from .error_error_code import ErrorErrorCode
 from .event import Event
 from .export_contract_events_csv_network import ExportContractEventsCsvNetwork
 from .failed_event import FailedEvent
@@ -186,11 +185,9 @@ from .remove_group_contract_body import RemoveGroupContractBody
 from .report_subscription import ReportSubscription
 from .report_subscription_frequency import ReportSubscriptionFrequency
 from .requeue_failed_event_response_200 import RequeueFailedEventResponse200
-from .role_error import RoleError
 from .rotate_api_key_admin_response_200 import RotateApiKeyAdminResponse200
 from .rotate_api_key_response_200 import RotateApiKeyResponse200
 from .rule_diagnostic import RuleDiagnostic
-from .scope_error import ScopeError
 from .set_alert_rule_enabled_body import SetAlertRuleEnabledBody
 from .slack_command_body import SlackCommandBody
 from .slack_message import SlackMessage
@@ -347,9 +344,8 @@ __all__ = (
     "CreateReportSubscriptionBody",
     "CreateReportSubscriptionBodyFrequency",
     "Error",
-    "ErrorErrorType0",
-    "ErrorErrorType0Code",
-    "ErrorErrorType1",
+    "ErrorError",
+    "ErrorErrorCode",
     "Event",
     "ExportContractEventsCsvNetwork",
     "FailedEvent",
@@ -448,11 +444,9 @@ __all__ = (
     "ReportSubscription",
     "ReportSubscriptionFrequency",
     "RequeueFailedEventResponse200",
-    "RoleError",
     "RotateApiKeyAdminResponse200",
     "RotateApiKeyResponse200",
     "RuleDiagnostic",
-    "ScopeError",
     "SetAlertRuleEnabledBody",
     "SlackCommandBody",
     "SlackMessage",

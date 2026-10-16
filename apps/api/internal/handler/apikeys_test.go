@@ -121,15 +121,24 @@ func TestAPIKeyMissingScopeBodyShape(t *testing.T) {
 	if w.Code != http.StatusForbidden {
 		t.Fatalf("want 403, got %d", w.Code)
 	}
-	var body map[string]string
+	var body struct {
+		Error struct {
+			Code      string `json:"code"`
+			Message   string `json:"message"`
+			RequestID string `json:"request_id"`
+		} `json:"error"`
+	}
 	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
 		t.Fatal(err)
 	}
-	if body["error"] != "missing scope" {
-		t.Errorf(`error: want "missing scope", got %q`, body["error"])
+	if body.Error.Code != "FORBIDDEN" {
+		t.Errorf("error.code: want FORBIDDEN, got %q", body.Error.Code)
 	}
-	if body["required"] != store.ScopeWriteContracts {
-		t.Errorf("required: want %q, got %q", store.ScopeWriteContracts, body["required"])
+	if want := "missing scope: " + store.ScopeWriteContracts; body.Error.Message != want {
+		t.Errorf("error.message: want %q, got %q", want, body.Error.Message)
+	}
+	if body.Error.RequestID == "" {
+		t.Error("error.request_id: want the request ID to be echoed")
 	}
 }
 

@@ -10,7 +10,6 @@ from ...client import AuthenticatedClient, Client
 from ...models.contract_note import ContractNote
 from ...models.contract_note_request import ContractNoteRequest
 from ...models.error import Error
-from ...models.role_error import RoleError
 from ...types import Response
 
 
@@ -40,7 +39,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> ContractNote | Error | RoleError | None:
+) -> ContractNote | Error | None:
     if response.status_code == 200:
         response_200 = ContractNote.from_dict(response.json())
 
@@ -52,7 +51,7 @@ def _parse_response(
         return response_401
 
     if response.status_code == 403:
-        response_403 = RoleError.from_dict(response.json())
+        response_403 = Error.from_dict(response.json())
 
         return response_403
 
@@ -84,7 +83,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[ContractNote | Error | RoleError]:
+) -> Response[ContractNote | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -99,7 +98,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: ContractNoteRequest,
-) -> Response[ContractNote | Error | RoleError]:
+) -> Response[ContractNote | Error]:
     """Rewrite a note
 
      Replaces a note's body. Only the note's author may rewrite it; any
@@ -115,7 +114,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ContractNote | Error | RoleError]
+        Response[ContractNote | Error]
     """
 
     kwargs = _get_kwargs(
@@ -137,7 +136,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: ContractNoteRequest,
-) -> ContractNote | Error | RoleError | None:
+) -> ContractNote | Error | None:
     """Rewrite a note
 
      Replaces a note's body. Only the note's author may rewrite it; any
@@ -153,7 +152,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ContractNote | Error | RoleError
+        ContractNote | Error
     """
 
     return sync_detailed(
@@ -170,7 +169,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: ContractNoteRequest,
-) -> Response[ContractNote | Error | RoleError]:
+) -> Response[ContractNote | Error]:
     """Rewrite a note
 
      Replaces a note's body. Only the note's author may rewrite it; any
@@ -186,7 +185,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ContractNote | Error | RoleError]
+        Response[ContractNote | Error]
     """
 
     kwargs = _get_kwargs(
@@ -206,7 +205,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: ContractNoteRequest,
-) -> ContractNote | Error | RoleError | None:
+) -> ContractNote | Error | None:
     """Rewrite a note
 
      Replaces a note's body. Only the note's author may rewrite it; any
@@ -222,7 +221,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ContractNote | Error | RoleError
+        ContractNote | Error
     """
 
     return (

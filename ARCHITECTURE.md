@@ -349,10 +349,12 @@ keyed by the chi route pattern (`internal/middleware/scopes.go`):
 | `read:watchdog`   | all `/api/v1/watchdog/*` reads                                                  |
 | `admin:*`         | everything, including API key management                                        |
 
-A presented key that lacks the required scope receives `403` with
-`{"error":"missing scope","required":"<scope>"}`. Unknown or revoked keys
-receive `401`. Requests that present no credential keep the public v0.1 read
-surface open; API key management always requires a credential.
+A presented key that lacks the required scope receives `403` with code
+`FORBIDDEN` and a message naming the scope. Unknown or revoked keys receive
+`401`. Every error response, from middleware or handler, uses the same JSON
+envelope: `{"error":{"code","message","request_id"}}`. Requests that present no
+credential keep the public v0.1 read surface open; API key management always
+requires a credential.
 
 #### Profiling: `/debug/pprof/*`
 

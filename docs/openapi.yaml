@@ -4842,13 +4842,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ScopeError"
+            $ref: "#/components/schemas/Error"
     ForbiddenRole:
       description: Identity present but role below the required minimum
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/RoleError"
+            $ref: "#/components/schemas/Error"
     NotFound:
       description: Resource not found
       content:
@@ -4967,41 +4967,16 @@ components:
       required: [error]
       properties:
         error:
-          oneOf:
-            - type: object
-              required: [code, message]
-              properties:
-                code:
-                  type: string
-                  enum: [NOT_FOUND, INVALID_INPUT, INTERNAL, RATE_LIMITED, UNSUPPORTED_MEDIA_TYPE]
-                message:
-                  type: string
-                request_id:
-                  type: string
-            - type: object
-              properties:
-                error:
-                  type: string
-
-    ScopeError:
-      type: object
-      required: [error, required]
-      properties:
-        error:
-          type: string
-        required:
-          type: string
-
-    RoleError:
-      type: object
-      required: [error, required, role]
-      properties:
-        error:
-          type: string
-        required:
-          type: string
-        role:
-          type: string
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum: [NOT_FOUND, INVALID_INPUT, INTERNAL, RATE_LIMITED, UNSUPPORTED_MEDIA_TYPE, UNAUTHORIZED, FORBIDDEN, PAYLOAD_TOO_LARGE, TIMEOUT]
+            message:
+              type: string
+            request_id:
+              type: string
 
     Contract:
       type: object

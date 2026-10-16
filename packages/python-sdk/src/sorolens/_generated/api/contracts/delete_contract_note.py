@@ -8,7 +8,6 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.error import Error
-from ...models.role_error import RoleError
 from ...types import Response
 
 
@@ -30,7 +29,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Any | Error | RoleError | None:
+) -> Any | Error | None:
     if response.status_code == 204:
         response_204 = cast(Any, None)
         return response_204
@@ -41,7 +40,7 @@ def _parse_response(
         return response_401
 
     if response.status_code == 403:
-        response_403 = RoleError.from_dict(response.json())
+        response_403 = Error.from_dict(response.json())
 
         return response_403
 
@@ -68,7 +67,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Any | Error | RoleError]:
+) -> Response[Any | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -82,7 +81,7 @@ def sync_detailed(
     note_id: UUID,
     *,
     client: AuthenticatedClient,
-) -> Response[Any | Error | RoleError]:
+) -> Response[Any | Error]:
     """Delete a note
 
      Removes a note. Only the note's author may delete it. Deleting a note
@@ -97,7 +96,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | Error | RoleError]
+        Response[Any | Error]
     """
 
     kwargs = _get_kwargs(
@@ -117,7 +116,7 @@ def sync(
     note_id: UUID,
     *,
     client: AuthenticatedClient,
-) -> Any | Error | RoleError | None:
+) -> Any | Error | None:
     """Delete a note
 
      Removes a note. Only the note's author may delete it. Deleting a note
@@ -132,7 +131,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | Error | RoleError
+        Any | Error
     """
 
     return sync_detailed(
@@ -147,7 +146,7 @@ async def asyncio_detailed(
     note_id: UUID,
     *,
     client: AuthenticatedClient,
-) -> Response[Any | Error | RoleError]:
+) -> Response[Any | Error]:
     """Delete a note
 
      Removes a note. Only the note's author may delete it. Deleting a note
@@ -162,7 +161,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | Error | RoleError]
+        Response[Any | Error]
     """
 
     kwargs = _get_kwargs(
@@ -180,7 +179,7 @@ async def asyncio(
     note_id: UUID,
     *,
     client: AuthenticatedClient,
-) -> Any | Error | RoleError | None:
+) -> Any | Error | None:
     """Delete a note
 
      Removes a note. Only the note's author may delete it. Deleting a note
@@ -195,7 +194,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | Error | RoleError
+        Any | Error
     """
 
     return (

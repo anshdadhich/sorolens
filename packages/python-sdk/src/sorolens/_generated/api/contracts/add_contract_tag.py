@@ -9,7 +9,6 @@ from ...client import AuthenticatedClient, Client
 from ...models.contract_tag_request import ContractTagRequest
 from ...models.contract_tags import ContractTags
 from ...models.error import Error
-from ...models.role_error import RoleError
 from ...types import Response
 
 
@@ -37,7 +36,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> ContractTags | Error | RoleError | None:
+) -> ContractTags | Error | None:
     if response.status_code == 200:
         response_200 = ContractTags.from_dict(response.json())
 
@@ -49,7 +48,7 @@ def _parse_response(
         return response_401
 
     if response.status_code == 403:
-        response_403 = RoleError.from_dict(response.json())
+        response_403 = Error.from_dict(response.json())
 
         return response_403
 
@@ -81,7 +80,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[ContractTags | Error | RoleError]:
+) -> Response[ContractTags | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -95,7 +94,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: ContractTagRequest,
-) -> Response[ContractTags | Error | RoleError]:
+) -> Response[ContractTags | Error]:
     """Add a tag to a contract
 
      Adds a user-defined tag to a contract. The tag is trimmed and
@@ -111,7 +110,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ContractTags | Error | RoleError]
+        Response[ContractTags | Error]
     """
 
     kwargs = _get_kwargs(
@@ -131,7 +130,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: ContractTagRequest,
-) -> ContractTags | Error | RoleError | None:
+) -> ContractTags | Error | None:
     """Add a tag to a contract
 
      Adds a user-defined tag to a contract. The tag is trimmed and
@@ -147,7 +146,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ContractTags | Error | RoleError
+        ContractTags | Error
     """
 
     return sync_detailed(
@@ -162,7 +161,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: ContractTagRequest,
-) -> Response[ContractTags | Error | RoleError]:
+) -> Response[ContractTags | Error]:
     """Add a tag to a contract
 
      Adds a user-defined tag to a contract. The tag is trimmed and
@@ -178,7 +177,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[ContractTags | Error | RoleError]
+        Response[ContractTags | Error]
     """
 
     kwargs = _get_kwargs(
@@ -196,7 +195,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: ContractTagRequest,
-) -> ContractTags | Error | RoleError | None:
+) -> ContractTags | Error | None:
     """Add a tag to a contract
 
      Adds a user-defined tag to a contract. The tag is trimmed and
@@ -212,7 +211,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        ContractTags | Error | RoleError
+        ContractTags | Error
     """
 
     return (

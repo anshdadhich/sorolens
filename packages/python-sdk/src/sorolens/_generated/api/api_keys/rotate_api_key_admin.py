@@ -7,7 +7,6 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.error import Error
-from ...models.role_error import RoleError
 from ...models.rotate_api_key_admin_response_200 import RotateApiKeyAdminResponse200
 from ...types import Response
 
@@ -28,7 +27,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Error | RoleError | RotateApiKeyAdminResponse200 | None:
+) -> Error | RotateApiKeyAdminResponse200 | None:
     if response.status_code == 200:
         response_200 = RotateApiKeyAdminResponse200.from_dict(response.json())
 
@@ -40,7 +39,7 @@ def _parse_response(
         return response_401
 
     if response.status_code == 403:
-        response_403 = RoleError.from_dict(response.json())
+        response_403 = Error.from_dict(response.json())
 
         return response_403
 
@@ -62,7 +61,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Error | RoleError | RotateApiKeyAdminResponse200]:
+) -> Response[Error | RotateApiKeyAdminResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -75,7 +74,7 @@ def sync_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[Error | RoleError | RotateApiKeyAdminResponse200]:
+) -> Response[Error | RotateApiKeyAdminResponse200]:
     """Rotate an API key (admin role only)
 
     Args:
@@ -86,7 +85,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | RoleError | RotateApiKeyAdminResponse200]
+        Response[Error | RotateApiKeyAdminResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -104,7 +103,7 @@ def sync(
     id: str,
     *,
     client: AuthenticatedClient,
-) -> Error | RoleError | RotateApiKeyAdminResponse200 | None:
+) -> Error | RotateApiKeyAdminResponse200 | None:
     """Rotate an API key (admin role only)
 
     Args:
@@ -115,7 +114,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | RoleError | RotateApiKeyAdminResponse200
+        Error | RotateApiKeyAdminResponse200
     """
 
     return sync_detailed(
@@ -128,7 +127,7 @@ async def asyncio_detailed(
     id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[Error | RoleError | RotateApiKeyAdminResponse200]:
+) -> Response[Error | RotateApiKeyAdminResponse200]:
     """Rotate an API key (admin role only)
 
     Args:
@@ -139,7 +138,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | RoleError | RotateApiKeyAdminResponse200]
+        Response[Error | RotateApiKeyAdminResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -155,7 +154,7 @@ async def asyncio(
     id: str,
     *,
     client: AuthenticatedClient,
-) -> Error | RoleError | RotateApiKeyAdminResponse200 | None:
+) -> Error | RotateApiKeyAdminResponse200 | None:
     """Rotate an API key (admin role only)
 
     Args:
@@ -166,7 +165,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | RoleError | RotateApiKeyAdminResponse200
+        Error | RotateApiKeyAdminResponse200
     """
 
     return (

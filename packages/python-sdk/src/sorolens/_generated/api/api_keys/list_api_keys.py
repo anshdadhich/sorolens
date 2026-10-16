@@ -7,7 +7,6 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.list_api_keys_response_200 import ListApiKeysResponse200
-from ...models.scope_error import ScopeError
 from ...types import UNSET, Response, Unset
 
 
@@ -36,7 +35,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Error | ListApiKeysResponse200 | ScopeError | None:
+) -> Error | ListApiKeysResponse200 | None:
     if response.status_code == 200:
         response_200 = ListApiKeysResponse200.from_dict(response.json())
 
@@ -48,7 +47,7 @@ def _parse_response(
         return response_401
 
     if response.status_code == 403:
-        response_403 = ScopeError.from_dict(response.json())
+        response_403 = Error.from_dict(response.json())
 
         return response_403
 
@@ -70,7 +69,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Error | ListApiKeysResponse200 | ScopeError]:
+) -> Response[Error | ListApiKeysResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -84,7 +83,7 @@ def sync_detailed(
     client: AuthenticatedClient,
     cursor: str | Unset = UNSET,
     limit: int | Unset = UNSET,
-) -> Response[Error | ListApiKeysResponse200 | ScopeError]:
+) -> Response[Error | ListApiKeysResponse200]:
     """List API keys
 
     Args:
@@ -96,7 +95,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | ListApiKeysResponse200 | ScopeError]
+        Response[Error | ListApiKeysResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -116,7 +115,7 @@ def sync(
     client: AuthenticatedClient,
     cursor: str | Unset = UNSET,
     limit: int | Unset = UNSET,
-) -> Error | ListApiKeysResponse200 | ScopeError | None:
+) -> Error | ListApiKeysResponse200 | None:
     """List API keys
 
     Args:
@@ -128,7 +127,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | ListApiKeysResponse200 | ScopeError
+        Error | ListApiKeysResponse200
     """
 
     return sync_detailed(
@@ -143,7 +142,7 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     cursor: str | Unset = UNSET,
     limit: int | Unset = UNSET,
-) -> Response[Error | ListApiKeysResponse200 | ScopeError]:
+) -> Response[Error | ListApiKeysResponse200]:
     """List API keys
 
     Args:
@@ -155,7 +154,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | ListApiKeysResponse200 | ScopeError]
+        Response[Error | ListApiKeysResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -173,7 +172,7 @@ async def asyncio(
     client: AuthenticatedClient,
     cursor: str | Unset = UNSET,
     limit: int | Unset = UNSET,
-) -> Error | ListApiKeysResponse200 | ScopeError | None:
+) -> Error | ListApiKeysResponse200 | None:
     """List API keys
 
     Args:
@@ -185,7 +184,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | ListApiKeysResponse200 | ScopeError
+        Error | ListApiKeysResponse200
     """
 
     return (

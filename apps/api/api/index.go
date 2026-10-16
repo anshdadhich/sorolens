@@ -73,7 +73,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if handler == nil {
-		http.Error(w, `{"error":{"code":"INTERNAL","message":"server not initialized"}}`, http.StatusInternalServerError)
+		middleware.WriteError(w, r, http.StatusInternalServerError, middleware.CodeInternal, "server not initialized")
 		return
 	}
 	handler.ServeHTTP(w, r)

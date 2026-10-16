@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -175,8 +174,8 @@ func normalizePattern(pattern string) string {
 //     (API key management) always require a credential, so keys cannot be
 //     minted anonymously.
 //   - Credential presented but unknown or revoked: 401.
-//   - Credential valid but missing the required scope: 403 with
-//     {"error":"missing scope","required":"<scope>"}.
+//   - Credential valid but missing the required scope: 403 with code
+//     FORBIDDEN and a message naming the scope.
 func RequireScopes(lookup APIKeyLookup, logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -184,9 +183,7 @@ func RequireScopes(lookup APIKeyLookup, logger *slog.Logger) func(http.Handler) 
 			token := extractAPIKey(r)
 			if token == "" {
 				if hasScopeRule && required == ScopeAdmin {
-					writeScopeError(w, http.StatusUnauthorized, map[string]string{
-						"error": "authentication required",
-					})
+					WriteError(w, r, http.StatusUnauthorized, CodeUnauthorized, "authentication required")
 					return
 				}
 				next.ServeHTTP(w, r)
@@ -195,9 +192,7 @@ func RequireScopes(lookup APIKeyLookup, logger *slog.Logger) func(http.Handler) 
 
 			key, err := lookup.GetAPIKeyByHash(r.Context(), store.HashKey(token))
 			if err != nil || key.Revoked() {
-				writeScopeError(w, http.StatusUnauthorized, map[string]string{
-					"error": "invalid API key",
-				})
+				WriteError(w, r, http.StatusUnauthorized, CodeUnauthorized, "invalid API key")
 				return
 			}
 			if err := lookup.TouchAPIKey(r.Context(), key.ID); err != nil && logger != nil {
@@ -209,10 +204,7 @@ func RequireScopes(lookup APIKeyLookup, logger *slog.Logger) func(http.Handler) 
 				return
 			}
 
-			writeScopeError(w, http.StatusForbidden, map[string]string{
-				"error":    "missing scope",
-				"required": required,
-			})
+			WriteError(w, r, http.StatusForbidden, CodeForbidden, "missing scope: "+required)
 		})
 	}
 }
@@ -234,10 +226,4 @@ func extractAPIKey(r *http.Request) string {
 		}
 	}
 	return strings.TrimSpace(r.URL.Query().Get("api_key"))
-}
-
-func writeScopeError(w http.ResponseWriter, status int, body map[string]string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(body)
 }

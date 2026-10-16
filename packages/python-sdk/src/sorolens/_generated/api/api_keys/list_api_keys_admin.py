@@ -7,7 +7,6 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.list_api_keys_admin_response_200 import ListApiKeysAdminResponse200
-from ...models.role_error import RoleError
 from ...types import UNSET, Response, Unset
 
 
@@ -36,7 +35,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Error | ListApiKeysAdminResponse200 | RoleError | None:
+) -> Error | ListApiKeysAdminResponse200 | None:
     if response.status_code == 200:
         response_200 = ListApiKeysAdminResponse200.from_dict(response.json())
 
@@ -48,7 +47,7 @@ def _parse_response(
         return response_401
 
     if response.status_code == 403:
-        response_403 = RoleError.from_dict(response.json())
+        response_403 = Error.from_dict(response.json())
 
         return response_403
 
@@ -65,7 +64,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Error | ListApiKeysAdminResponse200 | RoleError]:
+) -> Response[Error | ListApiKeysAdminResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -79,7 +78,7 @@ def sync_detailed(
     client: AuthenticatedClient,
     cursor: str | Unset = UNSET,
     limit: int | Unset = UNSET,
-) -> Response[Error | ListApiKeysAdminResponse200 | RoleError]:
+) -> Response[Error | ListApiKeysAdminResponse200]:
     """List API keys (admin role only)
 
     Args:
@@ -91,7 +90,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | ListApiKeysAdminResponse200 | RoleError]
+        Response[Error | ListApiKeysAdminResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -111,7 +110,7 @@ def sync(
     client: AuthenticatedClient,
     cursor: str | Unset = UNSET,
     limit: int | Unset = UNSET,
-) -> Error | ListApiKeysAdminResponse200 | RoleError | None:
+) -> Error | ListApiKeysAdminResponse200 | None:
     """List API keys (admin role only)
 
     Args:
@@ -123,7 +122,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | ListApiKeysAdminResponse200 | RoleError
+        Error | ListApiKeysAdminResponse200
     """
 
     return sync_detailed(
@@ -138,7 +137,7 @@ async def asyncio_detailed(
     client: AuthenticatedClient,
     cursor: str | Unset = UNSET,
     limit: int | Unset = UNSET,
-) -> Response[Error | ListApiKeysAdminResponse200 | RoleError]:
+) -> Response[Error | ListApiKeysAdminResponse200]:
     """List API keys (admin role only)
 
     Args:
@@ -150,7 +149,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | ListApiKeysAdminResponse200 | RoleError]
+        Response[Error | ListApiKeysAdminResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -168,7 +167,7 @@ async def asyncio(
     client: AuthenticatedClient,
     cursor: str | Unset = UNSET,
     limit: int | Unset = UNSET,
-) -> Error | ListApiKeysAdminResponse200 | RoleError | None:
+) -> Error | ListApiKeysAdminResponse200 | None:
     """List API keys (admin role only)
 
     Args:
@@ -180,7 +179,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | ListApiKeysAdminResponse200 | RoleError
+        Error | ListApiKeysAdminResponse200
     """
 
     return (

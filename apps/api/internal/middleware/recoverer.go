@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"runtime/debug"
@@ -18,15 +17,7 @@ func Recoverer(logger *slog.Logger) func(http.Handler) http.Handler {
 						"stack", string(debug.Stack()),
 						"request_id", GetRequestID(r.Context()),
 					)
-					w.Header().Set("Content-Type", "application/json")
-					w.WriteHeader(http.StatusInternalServerError)
-					_ = json.NewEncoder(w).Encode(map[string]any{
-						"error": map[string]string{
-							"code":       "INTERNAL",
-							"message":    "internal server error",
-							"request_id": GetRequestID(r.Context()),
-						},
-					})
+					WriteError(w, r, http.StatusInternalServerError, CodeInternal, "internal server error")
 				}
 			}()
 			next.ServeHTTP(w, r)

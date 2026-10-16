@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -63,17 +62,15 @@ func requireRole(lookup UserLookup, logger *slog.Logger, minRole string, unauthS
 				if logger != nil {
 					logger.Debug("role middleware: no identity", "path", r.URL.Path)
 				}
-				writeRoleError(w, unauthStatus, map[string]string{
-					"error": "authentication required",
-				})
+				code := CodeForbidden
+				if unauthStatus == http.StatusUnauthorized {
+					code = CodeUnauthorized
+				}
+				WriteError(w, r, unauthStatus, code, "authentication required")
 				return
 			}
 			if store.RoleRank(user.Role) < store.RoleRank(minRole) {
-				writeRoleError(w, http.StatusForbidden, map[string]string{
-					"error":    "insufficient role",
-					"required": minRole,
-					"role":     user.Role,
-				})
+				WriteError(w, r, http.StatusForbidden, CodeForbidden, "insufficient role: requires "+minRole)
 				return
 			}
 			next.ServeHTTP(w, r)
@@ -115,10 +112,4 @@ func resolveUser(r *http.Request, lookup UserLookup) (store.User, bool) {
 		}
 	}
 	return store.User{}, false
-}
-
-func writeRoleError(w http.ResponseWriter, status int, body map[string]string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(body)
 }

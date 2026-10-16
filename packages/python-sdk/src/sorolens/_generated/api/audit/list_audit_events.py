@@ -8,7 +8,6 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.error import Error
 from ...models.list_audit_events_response_200 import ListAuditEventsResponse200
-from ...models.role_error import RoleError
 from ...types import UNSET, Response, Unset
 
 
@@ -43,7 +42,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Error | ListAuditEventsResponse200 | RoleError | None:
+) -> Error | ListAuditEventsResponse200 | None:
     if response.status_code == 200:
         response_200 = ListAuditEventsResponse200.from_dict(response.json())
 
@@ -55,7 +54,7 @@ def _parse_response(
         return response_401
 
     if response.status_code == 403:
-        response_403 = RoleError.from_dict(response.json())
+        response_403 = Error.from_dict(response.json())
 
         return response_403
 
@@ -77,7 +76,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Error | ListAuditEventsResponse200 | RoleError]:
+) -> Response[Error | ListAuditEventsResponse200]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -92,7 +91,7 @@ def sync_detailed(
     since: datetime.datetime | Unset = UNSET,
     limit: int | Unset = UNSET,
     cursor: str | Unset = UNSET,
-) -> Response[Error | ListAuditEventsResponse200 | RoleError]:
+) -> Response[Error | ListAuditEventsResponse200]:
     """List audit events (admin role only)
 
      Structured trail of every state-changing API request, newest first. Only a SHA-256 hash of each
@@ -108,7 +107,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | ListAuditEventsResponse200 | RoleError]
+        Response[Error | ListAuditEventsResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -130,7 +129,7 @@ def sync(
     since: datetime.datetime | Unset = UNSET,
     limit: int | Unset = UNSET,
     cursor: str | Unset = UNSET,
-) -> Error | ListAuditEventsResponse200 | RoleError | None:
+) -> Error | ListAuditEventsResponse200 | None:
     """List audit events (admin role only)
 
      Structured trail of every state-changing API request, newest first. Only a SHA-256 hash of each
@@ -146,7 +145,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | ListAuditEventsResponse200 | RoleError
+        Error | ListAuditEventsResponse200
     """
 
     return sync_detailed(
@@ -163,7 +162,7 @@ async def asyncio_detailed(
     since: datetime.datetime | Unset = UNSET,
     limit: int | Unset = UNSET,
     cursor: str | Unset = UNSET,
-) -> Response[Error | ListAuditEventsResponse200 | RoleError]:
+) -> Response[Error | ListAuditEventsResponse200]:
     """List audit events (admin role only)
 
      Structured trail of every state-changing API request, newest first. Only a SHA-256 hash of each
@@ -179,7 +178,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | ListAuditEventsResponse200 | RoleError]
+        Response[Error | ListAuditEventsResponse200]
     """
 
     kwargs = _get_kwargs(
@@ -199,7 +198,7 @@ async def asyncio(
     since: datetime.datetime | Unset = UNSET,
     limit: int | Unset = UNSET,
     cursor: str | Unset = UNSET,
-) -> Error | ListAuditEventsResponse200 | RoleError | None:
+) -> Error | ListAuditEventsResponse200 | None:
     """List audit events (admin role only)
 
      Structured trail of every state-changing API request, newest first. Only a SHA-256 hash of each
@@ -215,7 +214,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | ListAuditEventsResponse200 | RoleError
+        Error | ListAuditEventsResponse200
     """
 
     return (

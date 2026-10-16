@@ -7,36 +7,20 @@ import (
 	"github.com/sorolens/sorolens/apps/api/internal/middleware"
 )
 
+// Error codes live in middleware so every error response, from middleware or
+// handler, draws on one vocabulary (issue #533).
 const (
-	CodeNotFound         = "NOT_FOUND"
-	CodeInvalidInput     = "INVALID_INPUT"
-	CodeInternal         = "INTERNAL"
-	CodeForbidden        = "FORBIDDEN"
-	CodeRateLimited      = "RATE_LIMITED"
-	CodeUnsupportedMedia = "UNSUPPORTED_MEDIA_TYPE"
-	CodeUnauthorized     = "UNAUTHORIZED"
+	CodeNotFound         = middleware.CodeNotFound
+	CodeInvalidInput     = middleware.CodeInvalidInput
+	CodeInternal         = middleware.CodeInternal
+	CodeForbidden        = middleware.CodeForbidden
+	CodeRateLimited      = middleware.CodeRateLimited
+	CodeUnsupportedMedia = middleware.CodeUnsupportedMedia
+	CodeUnauthorized     = middleware.CodeUnauthorized
 )
 
-type errorBody struct {
-	Code      string `json:"code"`
-	Message   string `json:"message"`
-	RequestID string `json:"request_id"`
-}
-
-type errorEnvelope struct {
-	Error errorBody `json:"error"`
-}
-
 func writeError(w http.ResponseWriter, r *http.Request, status int, code, message string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(errorEnvelope{
-		Error: errorBody{
-			Code:      code,
-			Message:   message,
-			RequestID: middleware.GetRequestID(r.Context()),
-		},
-	})
+	middleware.WriteError(w, r, status, code, message)
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {

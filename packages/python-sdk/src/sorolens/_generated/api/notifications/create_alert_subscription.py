@@ -8,7 +8,6 @@ from ...client import AuthenticatedClient, Client
 from ...models.alert_subscription import AlertSubscription
 from ...models.create_alert_subscription import CreateAlertSubscription
 from ...models.error import Error
-from ...models.role_error import RoleError
 from ...types import Response
 
 
@@ -33,7 +32,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> AlertSubscription | Error | RoleError | None:
+) -> AlertSubscription | Error | None:
     if response.status_code == 201:
         response_201 = AlertSubscription.from_dict(response.json())
 
@@ -45,7 +44,7 @@ def _parse_response(
         return response_401
 
     if response.status_code == 403:
-        response_403 = RoleError.from_dict(response.json())
+        response_403 = Error.from_dict(response.json())
 
         return response_403
 
@@ -72,7 +71,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[AlertSubscription | Error | RoleError]:
+) -> Response[AlertSubscription | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -85,7 +84,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: CreateAlertSubscription,
-) -> Response[AlertSubscription | Error | RoleError]:
+) -> Response[AlertSubscription | Error]:
     """Subscribe a channel to a contract's alerts
 
      Critical alerts for the contract are delivered to the channel in its
@@ -101,7 +100,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[AlertSubscription | Error | RoleError]
+        Response[AlertSubscription | Error]
     """
 
     kwargs = _get_kwargs(
@@ -119,7 +118,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: CreateAlertSubscription,
-) -> AlertSubscription | Error | RoleError | None:
+) -> AlertSubscription | Error | None:
     """Subscribe a channel to a contract's alerts
 
      Critical alerts for the contract are delivered to the channel in its
@@ -135,7 +134,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        AlertSubscription | Error | RoleError
+        AlertSubscription | Error
     """
 
     return sync_detailed(
@@ -148,7 +147,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: CreateAlertSubscription,
-) -> Response[AlertSubscription | Error | RoleError]:
+) -> Response[AlertSubscription | Error]:
     """Subscribe a channel to a contract's alerts
 
      Critical alerts for the contract are delivered to the channel in its
@@ -164,7 +163,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[AlertSubscription | Error | RoleError]
+        Response[AlertSubscription | Error]
     """
 
     kwargs = _get_kwargs(
@@ -180,7 +179,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: CreateAlertSubscription,
-) -> AlertSubscription | Error | RoleError | None:
+) -> AlertSubscription | Error | None:
     """Subscribe a channel to a contract's alerts
 
      Critical alerts for the contract are delivered to the channel in its
@@ -196,7 +195,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        AlertSubscription | Error | RoleError
+        AlertSubscription | Error
     """
 
     return (

@@ -29,7 +29,7 @@ fi
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
-"$PYTHON" -m pip install --quiet "openapi-python-client==$generator_version"
+"$PYTHON" -m pip install --quiet "openapi-python-client==$generator_version" "ruff==0.17.1"
 "$PYTHON" -m openapi_python_client generate --path "$spec" --meta none --output-path "$tmp/client"
 
 rm -rf "$target"

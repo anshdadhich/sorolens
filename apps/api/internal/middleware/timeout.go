@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"time"
 )
@@ -63,17 +62,10 @@ func StreamTimeout(d time.Duration) func(http.Handler) http.Handler {
 	}
 }
 
-// timeoutBody renders the 503 body in the same envelope as every other API
-// error, carrying the request ID so a timed-out call can be traced in logs.
+// timeoutBody renders the 503 body in the standard error envelope, carrying
+// the request ID so a timed-out call can be traced in logs.
 func timeoutBody(r *http.Request) string {
-	b, _ := json.Marshal(map[string]any{
-		"error": map[string]string{
-			"code":       "TIMEOUT",
-			"message":    "request exceeded the server time limit",
-			"request_id": GetRequestID(r.Context()),
-		},
-	})
-	return string(b)
+	return ErrorJSON(r, CodeTimeout, "request exceeded the server time limit")
 }
 
 // timeoutJSONWriter labels the http.TimeoutHandler 503 as JSON. On the

@@ -7,7 +7,6 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.add_watched_account_body import AddWatchedAccountBody
 from ...models.error import Error
-from ...models.role_error import RoleError
 from ...models.watched_account import WatchedAccount
 from ...types import Response
 
@@ -33,7 +32,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Error | RoleError | WatchedAccount | None:
+) -> Error | WatchedAccount | None:
     if response.status_code == 200:
         response_200 = WatchedAccount.from_dict(response.json())
 
@@ -50,7 +49,7 @@ def _parse_response(
         return response_401
 
     if response.status_code == 403:
-        response_403 = RoleError.from_dict(response.json())
+        response_403 = Error.from_dict(response.json())
 
         return response_403
 
@@ -77,7 +76,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Error | RoleError | WatchedAccount]:
+) -> Response[Error | WatchedAccount]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -90,7 +89,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: AddWatchedAccountBody,
-) -> Response[Error | RoleError | WatchedAccount]:
+) -> Response[Error | WatchedAccount]:
     """Watch an account for new contract deployments
 
      Idempotent: returns 201 when the account is newly watched and 200 when it already was. Same role
@@ -104,7 +103,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | RoleError | WatchedAccount]
+        Response[Error | WatchedAccount]
     """
 
     kwargs = _get_kwargs(
@@ -122,7 +121,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: AddWatchedAccountBody,
-) -> Error | RoleError | WatchedAccount | None:
+) -> Error | WatchedAccount | None:
     """Watch an account for new contract deployments
 
      Idempotent: returns 201 when the account is newly watched and 200 when it already was. Same role
@@ -136,7 +135,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | RoleError | WatchedAccount
+        Error | WatchedAccount
     """
 
     return sync_detailed(
@@ -149,7 +148,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: AddWatchedAccountBody,
-) -> Response[Error | RoleError | WatchedAccount]:
+) -> Response[Error | WatchedAccount]:
     """Watch an account for new contract deployments
 
      Idempotent: returns 201 when the account is newly watched and 200 when it already was. Same role
@@ -163,7 +162,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | RoleError | WatchedAccount]
+        Response[Error | WatchedAccount]
     """
 
     kwargs = _get_kwargs(
@@ -179,7 +178,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: AddWatchedAccountBody,
-) -> Error | RoleError | WatchedAccount | None:
+) -> Error | WatchedAccount | None:
     """Watch an account for new contract deployments
 
      Idempotent: returns 201 when the account is newly watched and 200 when it already was. Same role
@@ -193,7 +192,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | RoleError | WatchedAccount
+        Error | WatchedAccount
     """
 
     return (

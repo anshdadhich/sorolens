@@ -8,7 +8,6 @@ from ...client import AuthenticatedClient, Client
 from ...models.contract import Contract
 from ...models.error import Error
 from ...models.register_contract_body import RegisterContractBody
-from ...models.role_error import RoleError
 from ...types import Response
 
 
@@ -33,7 +32,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Contract | Error | RoleError | None:
+) -> Contract | Error | None:
     if response.status_code == 201:
         response_201 = Contract.from_dict(response.json())
 
@@ -45,7 +44,7 @@ def _parse_response(
         return response_401
 
     if response.status_code == 403:
-        response_403 = RoleError.from_dict(response.json())
+        response_403 = Error.from_dict(response.json())
 
         return response_403
 
@@ -72,7 +71,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Contract | Error | RoleError]:
+) -> Response[Contract | Error]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -85,7 +84,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: RegisterContractBody,
-) -> Response[Contract | Error | RoleError]:
+) -> Response[Contract | Error]:
     """Register a contract for tracking
 
     Args:
@@ -96,7 +95,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Contract | Error | RoleError]
+        Response[Contract | Error]
     """
 
     kwargs = _get_kwargs(
@@ -114,7 +113,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: RegisterContractBody,
-) -> Contract | Error | RoleError | None:
+) -> Contract | Error | None:
     """Register a contract for tracking
 
     Args:
@@ -125,7 +124,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Contract | Error | RoleError
+        Contract | Error
     """
 
     return sync_detailed(
@@ -138,7 +137,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: RegisterContractBody,
-) -> Response[Contract | Error | RoleError]:
+) -> Response[Contract | Error]:
     """Register a contract for tracking
 
     Args:
@@ -149,7 +148,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Contract | Error | RoleError]
+        Response[Contract | Error]
     """
 
     kwargs = _get_kwargs(
@@ -165,7 +164,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: RegisterContractBody,
-) -> Contract | Error | RoleError | None:
+) -> Contract | Error | None:
     """Register a contract for tracking
 
     Args:
@@ -176,7 +175,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Contract | Error | RoleError
+        Contract | Error
     """
 
     return (

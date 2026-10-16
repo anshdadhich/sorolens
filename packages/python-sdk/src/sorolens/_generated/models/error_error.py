@@ -1,28 +1,28 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, Self, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 from typing_extensions import Self
 
-from ..models.error_error_type_0_code import ErrorErrorType0Code
+from ..models.error_error_code import ErrorErrorCode
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="ErrorErrorType0")
+T = TypeVar("T", bound="ErrorError")
 
 
 @_attrs_define
-class ErrorErrorType0:
+class ErrorError:
     """
     Attributes:
-        code (ErrorErrorType0Code):
+        code (ErrorErrorCode):
         message (str):
         request_id (str | Unset):
     """
 
-    code: ErrorErrorType0Code
+    code: ErrorErrorCode
     message: str
     request_id: str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -50,20 +50,20 @@ class ErrorErrorType0:
     @classmethod
     def from_dict(cls, src_dict: Mapping[str, Any]) -> Self:
         d = dict(src_dict)
-        code = ErrorErrorType0Code(d.pop("code"))
+        code = ErrorErrorCode(d.pop("code"))
 
         message = d.pop("message")
 
         request_id = d.pop("request_id", UNSET)
 
-        error_error_type_0 = cls(
+        error_error = cls(
             code=code,
             message=message,
             request_id=request_id,
         )
 
-        error_error_type_0.additional_properties = d
-        return error_error_type_0
+        error_error.additional_properties = d
+        return error_error
 
     @property
     def additional_keys(self) -> list[str]:

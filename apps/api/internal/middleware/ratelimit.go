@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"encoding/json"
 	"net"
 	"net/http"
 	"strconv"
@@ -65,15 +64,7 @@ func RateLimit(rc RedisClient, lookup APIKeyLookup) func(http.Handler) http.Hand
 
 			if count > int64(limit) {
 				w.Header().Set("Retry-After", "60")
-				w.Header().Set("Content-Type", "application/json")
-				w.WriteHeader(http.StatusTooManyRequests)
-				_ = json.NewEncoder(w).Encode(map[string]any{
-					"error": map[string]string{
-						"code":       "RATE_LIMITED",
-						"message":    "too many requests",
-						"request_id": GetRequestID(r.Context()),
-					},
-				})
+				WriteError(w, r, http.StatusTooManyRequests, CodeRateLimited, "too many requests")
 				return
 			}
 			next.ServeHTTP(w, r)

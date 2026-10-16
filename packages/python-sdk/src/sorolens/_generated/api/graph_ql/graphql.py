@@ -9,7 +9,6 @@ from ...models.error import Error
 from ...models.graphql_body import GraphqlBody
 from ...models.graphql_response_200 import GraphqlResponse200
 from ...models.graphql_response_400 import GraphqlResponse400
-from ...models.role_error import RoleError
 from ...types import Response
 
 
@@ -34,7 +33,7 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Error | GraphqlResponse200 | GraphqlResponse400 | RoleError | None:
+) -> Error | GraphqlResponse200 | GraphqlResponse400 | None:
     if response.status_code == 200:
         response_200 = GraphqlResponse200.from_dict(response.json())
 
@@ -51,7 +50,7 @@ def _parse_response(
         return response_401
 
     if response.status_code == 403:
-        response_403 = RoleError.from_dict(response.json())
+        response_403 = Error.from_dict(response.json())
 
         return response_403
 
@@ -73,7 +72,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Error | GraphqlResponse200 | GraphqlResponse400 | RoleError]:
+) -> Response[Error | GraphqlResponse200 | GraphqlResponse400]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -86,7 +85,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: GraphqlBody,
-) -> Response[Error | GraphqlResponse200 | GraphqlResponse400 | RoleError]:
+) -> Response[Error | GraphqlResponse200 | GraphqlResponse400]:
     """Read-only GraphQL endpoint
 
      GraphQL query surface over contracts, events, invocations, storage, stats and watchdog data. POST
@@ -101,7 +100,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | GraphqlResponse200 | GraphqlResponse400 | RoleError]
+        Response[Error | GraphqlResponse200 | GraphqlResponse400]
     """
 
     kwargs = _get_kwargs(
@@ -119,7 +118,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: GraphqlBody,
-) -> Error | GraphqlResponse200 | GraphqlResponse400 | RoleError | None:
+) -> Error | GraphqlResponse200 | GraphqlResponse400 | None:
     """Read-only GraphQL endpoint
 
      GraphQL query surface over contracts, events, invocations, storage, stats and watchdog data. POST
@@ -134,7 +133,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | GraphqlResponse200 | GraphqlResponse400 | RoleError
+        Error | GraphqlResponse200 | GraphqlResponse400
     """
 
     return sync_detailed(
@@ -147,7 +146,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: GraphqlBody,
-) -> Response[Error | GraphqlResponse200 | GraphqlResponse400 | RoleError]:
+) -> Response[Error | GraphqlResponse200 | GraphqlResponse400]:
     """Read-only GraphQL endpoint
 
      GraphQL query surface over contracts, events, invocations, storage, stats and watchdog data. POST
@@ -162,7 +161,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Error | GraphqlResponse200 | GraphqlResponse400 | RoleError]
+        Response[Error | GraphqlResponse200 | GraphqlResponse400]
     """
 
     kwargs = _get_kwargs(
@@ -178,7 +177,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: GraphqlBody,
-) -> Error | GraphqlResponse200 | GraphqlResponse400 | RoleError | None:
+) -> Error | GraphqlResponse200 | GraphqlResponse400 | None:
     """Read-only GraphQL endpoint
 
      GraphQL query surface over contracts, events, invocations, storage, stats and watchdog data. POST
@@ -193,7 +192,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Error | GraphqlResponse200 | GraphqlResponse400 | RoleError
+        Error | GraphqlResponse200 | GraphqlResponse400
     """
 
     return (

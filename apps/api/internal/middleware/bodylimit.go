@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
@@ -93,14 +92,6 @@ func (t *responseTracker) Write(b []byte) (int, error) {
 func (t *responseTracker) Unwrap() http.ResponseWriter { return t.ResponseWriter }
 
 func writePayloadTooLarge(w http.ResponseWriter, r *http.Request, maxBytes int64) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusRequestEntityTooLarge)
-	// Ignore encode errors (e.g., client disconnect while writing the response); there's no meaningful recovery here.
-	_ = json.NewEncoder(w).Encode(map[string]any{
-		"error": map[string]string{
-			"code":       "PAYLOAD_TOO_LARGE",
-			"message":    "request body exceeds the " + strconv.FormatInt(maxBytes, 10) + " byte limit",
-			"request_id": GetRequestID(r.Context()),
-		},
-	})
+	WriteError(w, r, http.StatusRequestEntityTooLarge, CodePayloadTooLarge,
+		"request body exceeds the "+strconv.FormatInt(maxBytes, 10)+" byte limit")
 }
