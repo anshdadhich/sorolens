@@ -105,6 +105,11 @@ func New(h *handler.Handler, maxBodyBytes int64) http.Handler {
 	r.Use(middleware.Audit(h.Store, h.Logger, "/api/"))
 	r.Use(chiMiddleware.StripSlashes)
 	r.Use(middleware.Metrics)
+	// Security headers (issue #535) sit beyond route resolution so chi's
+	// 404s, every auth rejection and the rate limiter's 429s carry them; the
+	// middleware also adds Cache-Control: no-store on the key-management and
+	// admin prefixes.
+	r.Use(middleware.SecurityHeaders)
 
 	// Emit ETags on cacheable GET/HEAD responses and answer If-None-Match
 	// matches with an empty 304, short-circuiting the body before it
