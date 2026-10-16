@@ -50,16 +50,25 @@ func (h *Handler) Readyz(w http.ResponseWriter, r *http.Request) {
 	redisErr := h.Redis.Ping(ctx)
 
 	if dbErr != nil || redisErr != nil {
-		details := map[string]string{}
+		// The response stays deliberately generic so hostnames and DSN
+		// fragments never reach an unauthenticated caller; the raw errors go
+		// to the logs instead (issue #537).
+		checks := map[string]string{}
 		if dbErr != nil {
-			details["postgres"] = dbErr.Error()
+			checks["postgres"] = "unreachable"
+			if h.Logger != nil {
+				h.Logger.Warn("readiness: postgres unreachable", "err", dbErr)
+			}
 		}
 		if redisErr != nil {
-			details["redis"] = redisErr.Error()
+			checks["redis"] = "unreachable"
+			if h.Logger != nil {
+				h.Logger.Warn("readiness: redis unreachable", "err", redisErr)
+			}
 		}
 		writeJSON(w, http.StatusServiceUnavailable, map[string]any{
 			"status": "unavailable",
-			"checks": details,
+			"checks": checks,
 		})
 		return
 	}

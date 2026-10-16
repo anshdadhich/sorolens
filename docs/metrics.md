@@ -23,7 +23,7 @@ how to scrape them.
 
 | Service            | Endpoint       | Auth | Default address                  |
 | ------------------ | -------------- | ---- | -------------------------------- |
-| API                | `GET /metrics` | none | `PORT` (8080)                    |
+| API                | `GET /metrics` | open, or bearer `METRICS_TOKEN` | `PORT` (8080)                    |
 | API admin listener | `GET /metrics` | none | `METRICS_PORT` (only if set)     |
 | Indexer            | `GET /metrics` | none | `INDEXER_METRICS_ADDR` (`:9100`) |
 
@@ -37,9 +37,20 @@ criterion holds with a plain:
 curl -s localhost:8080/metrics
 ```
 
+Set `METRICS_TOKEN` to require a credential on that port: scrapes must then
+present it as an `Authorization: Bearer` token, or identify as an admin (the
+same identity headers the dashboard uses). Leave it unset to keep the endpoint
+open, which is the default for local development.
+
+```bash
+# API on :8080 with a gated /metrics
+METRICS_TOKEN=$(openssl rand -hex 32) go run ./cmd/api
+```
+
 Set `METRICS_PORT` to additionally serve the endpoint on a dedicated admin
 listener, which is the recommended production setup: the port can be bound to a
-private interface and excluded from the public ingress.
+private interface and excluded from the public ingress. The admin listener is
+not gated by `METRICS_TOKEN`, so keep the port private.
 
 ```bash
 # API on :8080, metrics also on :9090

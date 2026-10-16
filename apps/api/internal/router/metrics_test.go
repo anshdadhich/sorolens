@@ -27,9 +27,15 @@ func (metricsRedisClient) Expire(context.Context, string, time.Duration) (bool, 
 }
 
 func newMetricsTestRouter() http.Handler {
+	return newMetricsTestRouterWithStore(store.NewMockStore())
+}
+
+// newMetricsTestRouterWithStore is newMetricsTestRouter with a seeded store so
+// the gated endpoint tests can drive admin identity resolution.
+func newMetricsTestRouterWithStore(ms *store.MockStore) http.Handler {
 	logger := slog.New(slog.NewTextHandler(io.Discard, &slog.HandlerOptions{Level: slog.LevelError}))
 	h := &handler.Handler{
-		Store:       store.NewMockStore(),
+		Store:       ms,
 		DB:          &store.MockPinger{Healthy: true},
 		Redis:       &store.MockPinger{Healthy: true},
 		RedisClient: metricsRedisClient{},
@@ -203,8 +209,8 @@ func TestMetricsExposesRateLimitAndPoolCounters(t *testing.T) {
 }
 
 // TestMetricsEndpointIsUnauthenticated pins the acceptance criterion that the
-// endpoint needs no API key: a bare request (no Authorization, no X-API-Key)
-// must still return the exposition.
+// endpoint needs no API key by default: a bare request (no Authorization, no
+// X-API-Key) must still return the exposition.
 func TestMetricsEndpointIsUnauthenticated(t *testing.T) {
 	srv := newMetricsTestRouter()
 
@@ -213,5 +219,65 @@ func TestMetricsEndpointIsUnauthenticated(t *testing.T) {
 
 	if rr.Code != http.StatusOK {
 		t.Fatalf("GET /metrics without credentials: got status %d, want 200", rr.Code)
+	}
+}
+
+// TestMetricsEndpointRejectsUnauthenticatedWhenGated pins issue #537: once
+// METRICS_TOKEN is set, a scrape without credentials must be rejected.
+func TestMetricsEndpointRejectsUnauthenticatedWhenGated(t *testing.T) {
+	t.Setenv("METRICS_TOKEN", "s3cret")
+
+	srv := newMetricsTestRouter()
+	rr := httptest.NewRecorder()
+	srv.ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/metrics", nil))
+
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("GET /metrics without credentials: got status %d, want 401", rr.Code)
+	}
+	if got := rr.Header().Get("WWW-Authenticate"); got == "" {
+		t.Error("GET /metrics without credentials: missing WWW-Authenticate challenge")
+	}
+}
+
+// TestMetricsEndpointAcceptsBearerTokenWhenGated checks that the configured
+// token opens the endpoint.
+func TestMetricsEndpointAcceptsBearerTokenWhenGated(t *testing.T) {
+	t.Setenv("METRICS_TOKEN", "s3cret")
+
+	srv := newMetricsTestRouter()
+
+	// The exposition skips unobserved collectors, so drive one request first.
+	warm := httptest.NewRecorder()
+	srv.ServeHTTP(warm, httptest.NewRequest(http.MethodGet, "/health", nil))
+
+	req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
+	req.Header.Set("Authorization", "Bearer s3cret")
+	rr := httptest.NewRecorder()
+	srv.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("GET /metrics with bearer token: got status %d, want 200", rr.Code)
+	}
+	if body := rr.Body.String(); !strings.Contains(body, "sorolens_http_requests_total") {
+		t.Error("GET /metrics with bearer token: exposition missing expected metrics")
+	}
+}
+
+// TestMetricsEndpointAcceptsAdminIdentityWhenGated checks the second allowed
+// credential: a caller resolving to the admin role.
+func TestMetricsEndpointAcceptsAdminIdentityWhenGated(t *testing.T) {
+	t.Setenv("METRICS_TOKEN", "s3cret")
+
+	ms := store.NewMockStore()
+	ms.AddUser(store.User{ID: "admin-1", Role: store.RoleAdmin})
+	srv := newMetricsTestRouterWithStore(ms)
+
+	req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
+	req.Header.Set("X-User-ID", "admin-1")
+	rr := httptest.NewRecorder()
+	srv.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusOK {
+		t.Fatalf("GET /metrics as admin: got status %d, want 200", rr.Code)
 	}
 }

@@ -96,6 +96,18 @@ func TestReadyzUnhealthy(t *testing.T) {
 			if w.Code != http.StatusServiceUnavailable {
 				t.Fatalf("want 503, got %d", w.Code)
 			}
+			// The body must stay generic: the raw ping error is logged, never
+			// returned (issue #537).
+			body := w.Body.Bytes()
+			if wantPostgres := !tc.dbHealthy; bytes.Contains(body, []byte(`"postgres":"unreachable"`)) != wantPostgres {
+				t.Errorf("postgres check present = %v, want %v; body: %s", !wantPostgres, wantPostgres, body)
+			}
+			if wantRedis := !tc.redisHealthy; bytes.Contains(body, []byte(`"redis":"unreachable"`)) != wantRedis {
+				t.Errorf("redis check present = %v, want %v; body: %s", !wantRedis, wantRedis, body)
+			}
+			if leak := store.ErrPing.Error(); bytes.Contains(body, []byte(leak)) {
+				t.Errorf("body leaks the raw ping error %q: %s", leak, body)
+			}
 		})
 	}
 }

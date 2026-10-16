@@ -128,21 +128,24 @@ func New(h *handler.Handler, maxBodyBytes int64) http.Handler {
 	// and without the v1 scope/role middleware.
 	r.Get("/api/version", h.Version)
 
-	// Prometheus metrics. It sits outside /api/v1 so it needs no API key, and
-	// the rate limiter skips it explicitly (see middleware.RateLimit) so a
-	// scrape is never throttled. A registry per router keeps tests that build
-	// many routers independent; it carries the request collectors from the
-	// metrics package (updated by middleware.Metrics), the response-cache
-	// counters (issue #143), the rate-limiter decision counters, the Postgres
-	// pool collector (metrics.SetPool wires the live pool), and the default Go
-	// and process collectors.
+	// Prometheus metrics. It sits outside /api/v1 and is open by default, so
+	// a local scrape needs no credential; setting METRICS_TOKEN requires a
+	// bearer token or an admin identity (issue #537). The rate limiter skips
+	// it explicitly (see middleware.RateLimit) so a scrape is never
+	// throttled. A registry per router keeps tests that build many routers
+	// independent; it carries the request collectors from the metrics package
+	// (updated by middleware.Metrics), the response-cache counters (issue
+	// #143), the rate-limiter decision counters, the Postgres pool collector
+	// (metrics.SetPool wires the live pool), and the default Go and process
+	// collectors.
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(collectors.NewGoCollector(), collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
 	reg.MustRegister(middleware.CacheCollectors()...)
 	reg.MustRegister(middleware.RateLimitCollectors()...)
 	reg.MustRegister(metrics.HTTPRequestsInFlight, metrics.HTTPRequestsTotal, metrics.HTTPRequestDuration)
 	reg.MustRegister(metrics.PoolCollector())
-	r.Get("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}).ServeHTTP)
+	metricsAuth := middleware.ProtectMetricsFromEnv(h.Store, h.Logger)
+	r.With(metricsAuth).Get("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}).ServeHTTP)
 	pprofAdmin := middleware.RequireRoleOrForbidden(h.Store, h.Logger, middleware.RoleAdmin)
 	r.With(pprofAdmin).Get("/debug/pprof", pprof.Index)
 	r.With(pprofAdmin).Get("/debug/pprof/", pprof.Index)
